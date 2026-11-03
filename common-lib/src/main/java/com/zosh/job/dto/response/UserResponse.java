@@ -2,9 +2,11 @@ package com.zosh.job.dto.response;
 
 import com.zosh.job.domain.UserRole;
 import com.zosh.job.domain.UserStatus;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@Data
 public class UserResponse {
     private Long id;
     private String fullName;
