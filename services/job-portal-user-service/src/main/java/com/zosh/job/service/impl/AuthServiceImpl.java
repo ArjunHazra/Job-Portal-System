@@ -8,9 +8,13 @@ import com.zosh.job.payload.AuthResponse;
 import com.zosh.job.payload.LoginRequest;
 import com.zosh.job.payload.SignupRequest;
 import com.zosh.job.repository.UserRepository;
+import com.zosh.job.security.JwtProvider;
 import com.zosh.job.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +24,7 @@ import java.time.LocalDateTime;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
 
     @Override
     public AuthResponse signup(SignupRequest req) throws Exception{
@@ -46,10 +51,15 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        String jwt= jwtProvider.generateToken(auth,savedUser.getId());
+
         AuthResponse res =new AuthResponse();
         res.setTitle("Welcome "+savedUser.getFullName());
         res.setMessage("Registered Successfully");
-        res.setJwt("jwt");
+        res.setJwt(jwt);
         res.setUser(UserMapper.toDTO(savedUser));
         return res;//changed
     }
